@@ -1,0 +1,31 @@
+{
+  "name": "youtube-trend-radar",
+  "version": "1.1.0",
+  "description": "Радар вирусных YouTube Shorts: базы каналов по нишам, RSS-сканирование, поиск выстреливших видео и подборки",
+  "main": "server.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "scan": "node findViralVideos.mjs",
+    "scan:rss": "node scanChannelsRss.mjs"
+  },
+  "keywords": [
+    "youtube",
+    "shorts",
+    "trends",
+    "viral",
+    "rss",
+    "analytics"
+  ],
+  "author": "lexxgreat",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^5.2.1",
+    "googleapis": "^173.0.0",
+    "rss-parser": "^3.13.0"
+  }
+}

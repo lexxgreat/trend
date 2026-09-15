@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Viral Shorts Radar</title>
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --card-bg: #18181c;
+      --accent: #ff0050;
+      --text: #f3f3f3;
+      --text-sub: #a0a0aa;
+      --border: #2a2a32;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 24px;
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 0 auto 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+
+    h1 { margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 8px; }
+    .badge { background: var(--accent); font-size: 0.8rem; padding: 4px 8px; border-radius: 12px; }
+
+    .nav-tabs {
+      max-width: 1200px;
+      margin: 0 auto 20px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .tab-btn {
+      background: var(--card-bg);
+      color: var(--text-sub);
+      border: 1px solid var(--border);
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .panel {
+      max-width: 1200px;
+      margin: 0 auto 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    label { font-weight: 600; font-size: 0.9rem; color: var(--text-sub); }
+
+    input, select, textarea {
+      background: #101014;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    textarea { resize: vertical; min-height: 50px; }
+
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-green { background: #00aa55; }
+    .btn-blue { background: #0088ff; }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+    .controls {
+      max-width: 1200px;
+      margin: 0 auto 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .toggle-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.9rem;
+    }
+
+    .badge-new {
+      background: #ff0050;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: inline-block;
+      margin-left: 6px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .thumbnail-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      background-color: #000;
+    }
+
+    .thumbnail-img { width: 100%; height: 100%; object-fit: cover; }
+
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.3);
+      border: none;
+      cursor: pointer;
+      color: #fff;
+      font-size: 2.75rem;
+      transition: background 0.15s;
+    }
+
+    .play-overlay:hover { background: rgba(0, 0, 0, 0.45); color: var(--accent); }
+
+    .inline-player {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .close-player {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      line-height: 1;
+    }
+
+    .card-content { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; }
+
+    .niche-tag {
+      background: #2a2a35;
+      color: var(--text-sub);
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    .channel-niche-input {
+      background: #14161c;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 4px 8px;
+      font-size: 0.82rem;
+      min-width: 110px;
+      max-width: 160px;
+    }
+    .channel-niche-input:focus { outline: 1px solid var(--accent); }
+
+    .title { font-size: 0.95rem; font-weight: 600; margin: 0 0 8px; }
+    .channel { color: var(--text-sub); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+
+    .btn-link {
+      display: block;
+      text-align: center;
+      background: #fff;
+      color: #000;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .table-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow-x: auto;
+    }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    th { background: #121216; color: var(--text-sub); }
+
+    .table-thumb {
+      width: 45px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .date-cell {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      white-space: nowrap;
+    }
+
+    .gain-badge {
+      color: #00ff88;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .btn-warn { background: #e67e00; color: #fff; }
+    .btn-orange { background: #e67e00; color: #fff; }
+
+    .channels-toolbar {
+      max-width: 1200px;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+
+    .channels-toolbar label {
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .channels-toolbar input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .channels-status {
+      max-width: 1200px;
+      margin: 8px auto 12px;
+      font-size: 0.9rem;
+      color: var(--text-sub);
+    }
+
+    /* ─── Новые стили: ниши, подборки, спарклайны, BOOM ─── */
+    .boom-badge {
+      background: linear-gradient(135deg, #ff5f00, #ff0050);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      animation: pulse 1.5s infinite;
+    }
+
+    .sparkline {
+      width: 110px;
+      height: 34px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .sparkline-empty {
+      color: var(--text-sub);
+      font-size: 0.8rem;
+    }
+
+    .gain-unknown {
+      color: var(--text-sub);
+      font-size: 0.82rem;
+      font-style: italic;
+    }
+
+    .collections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .collection-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .collection-card h4 { margin: 0; font-size: 1.05rem; }
+    .collection-desc { color: var(--text-sub); font-size: 0.85rem; min-height: 20px; }
+    .collection-channels {
+      display: none;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 10px;
+      font-size: 0.82rem;
+    }
+    .collection-channels.open { display: block; }
+    .collection-channels a {
+      display: block;
+      color: var(--text-sub);
+      text-decoration: none;
+      padding: 3px 4px;
+      border-radius: 4px;
+    }
+    .collection-channels a:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--accent);
+    }
+    .collection-channels .chan-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-sub);
+      text-decoration: none;
+      padding: 3px 4px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .collection-channels .chan-row:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .collection-channels .chan-row .chan-remove {
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      opacity: 0;
+    }
+    .collection-channels .chan-row:hover .chan-remove {
+      opacity: 1;
+      color: #ff6b6b;
+    }
+    .collection-channels .chan-row .chan-remove:hover {
+      background: rgba(255, 107, 107, 0.12);
+    }
+    .collection-add-channel {
+      display: block;
+      width: 100%;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      color: var(--accent);
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .collection-add-channel:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .collection-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    /* ─── Каналы внутри карточки ниши ─── */
+    .niche-channels-container {
+      display: none;
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 10px;
+      font-size: 0.82rem;
+    }
+    .niche-channels-container.open { display: block; }
+    .niche-channels-container .niche-chan-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-sub);
+      padding: 3px 4px;
+      border-radius: 4px;
+    }
+    .niche-channels-container .niche-chan-row:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .niche-channels-container .niche-chan-row .chan-remove {
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      opacity: 0;
+    }
+    .niche-channels-container .niche-chan-row:hover .chan-remove {
+      opacity: 1;
+      color: #ff6b6b;
+    }
+    .niche-channels-container .niche-chan-row .chan-remove:hover {
+      background: rgba(255, 107, 107, 0.12);
+    }
+
+    .collection-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--text-sub);
+      font-size: 0.82rem;
+    }
+    .collection-stats strong { color: var(--text); }
+    .collection-stats .last-scan { color: var(--text-sub); }
+    .collection-results {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px;
+      font-size: 0.82rem;
+    }
+    .collection-results.open { display: block; }
+    .collection-results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      color: var(--text-sub);
+    }
+    .collection-results-header .btn { flex-shrink: 0; margin-left: 8px; }
+    .collection-results-list {
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .collection-results-list a {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--text-sub);
+      text-decoration: none;
+      padding: 4px 2px;
+      border-radius: 4px;
+    }
+    .collection-results-list a:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--accent);
+    }
+    .collection-results-list .result-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .collection-results-list .result-views {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    /* ─── Полноценный просмотр результатов подборки (плитка/таблица) ─── */
+    .collection-full-results {
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 16px;
+    }
+    .collection-full-results .full-results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .collection-full-results .controls {
+      max-width: 100%;
+      margin: 0 0 12px 0;
+    }
+    .collection-full-results .grid,
+    .collection-full-results .table-container {
+      max-width: 100%;
+    }
+
+    /* ─── Модальное окно добавления каналов в подборку ─── */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay[hidden] { display: none; }
+    .modal-box {
+      background: var(--card-bg, #14161c);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      width: 640px;
+      max-width: 94vw;
+      max-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .modal-box h3 { margin: 0; font-size: 1.05rem; }
+    .modal-box .modal-close {
+      background: none; border: none; color: var(--text-sub);
+      font-size: 1.2rem; cursor: pointer; line-height: 1;
+    }
+    .modal-search { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg, #14161c); color: var(--text); }
+    .modal-results {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+    }
+    .modal-results .m-result {
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .modal-results .m-result:hover { background: rgba(255, 255, 255, 0.07); }
+    .modal-results .m-result.added { opacity: 0.5; cursor: default; }
+    .modal-results .m-result.added:hover { background: transparent; }
+    .modal-results .m-result .m-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .modal-results .m-result .m-meta { color: var(--text-sub); font-size: 0.75rem; flex-shrink: 0; }
+    .modal-manual {
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+      font-size: 0.82rem; color: var(--text-sub);
+    }
+    .modal-manual input { padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg, #14161c); color: var(--text); flex: 1; min-width: 160px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+
+    .collections-toolbar {
+      max-width: 1200px;
+      margin: 0 auto 16px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .autocomplete-wrap { position: relative; flex: 1; }
+
+    .fuzzy-hint {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #101014;
+      border: 1px solid var(--border);
+      border-radius: 0 0 8px 8px;
+      z-index: 20;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .fuzzy-hint.show { display: block; }
+
+    .fuzzy-hint-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .fuzzy-hint-item:hover, .fuzzy-hint-item.selected {
+      background: #22222a;
+    }
+
+    .fuzzy-hint-item .fuzzy-tag {
+      color: #ffaa00;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-left: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <h1>🔥 Viral Shorts Radar <span class="badge" id="count">0</span></h1>
+      <div style="background: var(--card-bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 0.85rem;">
+        📊 Квота API: <strong id="quotaVal" style="color: #00ff88;">10,000</strong> units
+      </div>
+    </div>
+  </header>
+
+  <div class="nav-tabs">
+    <button class="tab-btn active" id="tabVideosBtn" onclick="switchTab('videos')">🔥 Виральные Shorts (<span id="videoCountTab">0</span>)</button>
+    <button class="tab-btn" id="tabNichesBtn" onclick="switchTab('niches')">🎯 Ниши</button>
+    <button class="tab-btn" id="tabCollectionsBtn" onclick="switchTab('collections')">📁 Подборки</button>
+    <button class="tab-btn" id="tabFindChannelsBtn" onclick="switchTab('findChannels')">🔍 Поиск каналов</button>
+    <button class="tab-btn" id="tabChannelsBtn" onclick="switchTab('channels')">📺 База каналов (<span id="channelCount">0</span>)</button>
+  </div>
+
+  <!-- Панель Поиска Виралок (Исходная) -->
+  <div class="panel" id="viralSearchPanel">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+      <h3 style="margin: 0;">🔎 Поиск Виральных Роликов (API & RSS)</h3>
+      
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <label for="rssTargetNiche" style="font-size: 0.85rem; margin: 0;">Ниша RSS:</label>
+        <select id="rssTargetNiche" style="font-size: 0.85rem; padding: 8px;">
+          <option value="ALL">🌐 Все ниши и каналы</option>
+        </select>
+        <button class="btn btn-green" onclick="runRssScan()">⚡ Сканировать RSS (0 units)</button>
+      </div>
+    </div>
+
+    <form id="searchForm" onsubmit="handleSearch(event)">
+      <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
+        <div class="form-group">
+          <label>Ниша:</label>
+          <input type="text" id="nicheInput" list="nichesList" placeholder="Танцы" required>
+          <datalist id="nichesList"></datalist>
+        </div>
+        <div class="form-group">
+          <label>Ключевые слова:</label>
+          <textarea id="keywordsInput" placeholder="tic tok dance, dance, kpop dance" required></textarea>
+        </div>
+      </div>
+      <button type="submit" class="btn" id="submitBtn">Найти виральные видео по API</button>
+      <div id="statusMsg" style="margin-top:10px; color: var(--accent); font-weight: 600;"></div>
+    </form>
+  </div>
+
+  <!-- Вкладка Поиска Каналов -->
+  <div id="findChannelsSection" style="display: none;">
+    <div class="panel">
+      <h3 style="margin-top:0; margin-bottom: 12px;">🔍 Поиск и сохранение новых каналов в базу</h3>
+      <form id="channelSearchForm" onsubmit="handleChannelSearch(event)">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
+          <div class="form-group">
+            <label>Ниша канала:</label>
+            <input type="text" id="channelNicheInput" placeholder="Танцы" required>
+          </div>
+          <div class="form-group">
+            <label>Ключевые слова для поиска авторов:</label>
+            <textarea id="channelKeywordsInput" placeholder="dance choreography, dance tutorial, tiktok dancer" required></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-blue" id="submitChannelBtn">Найти и добавить каналы в базу</button>
+        <div id="channelStatusMsg" style="margin-top:10px; color: #0088ff; font-weight: 600;"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Секция Таблицы/Сетки Виралок -->
+  <div id="videosSection">
+    <div class="controls">
+      <input type="text" id="searchInput" style="flex: 2;" placeholder="Поиск по названию или каналу..." oninput="renderVideos()">
+      <select id="nicheFilter" onchange="renderVideos()"><option value="ALL">📁 Все ниши</option></select>
+
+      <select id="sortSelect" onchange="renderVideos()">
+        <option value="newest" selected>⚡ Сначала новые (NEW / Дата)</option>
+        <option value="pubDate">📅 По дате публикации (свежие ↓)</option>
+        <option value="ratio">🔥 По вирусу (Ratio ↓)</option>
+        <option value="views">👁️ По просмотрам ↓</option>
+      </select>
+      
+      <select id="viewType" onchange="renderVideos()">
+        <option value="table" selected>📄 Таблица</option>
+        <option value="grid">🔲 Плитка</option>
+      </select>
+
+      <label class="toggle-box">
+        <input type="checkbox" id="showThumbnailsToggle" onchange="renderVideos()">
+        🖼️ Показать превью
+      </label>
+    </div>
+    
+    <div id="videosContainer"></div>
+  </div>
+
+  <!-- 🎯 Секция Ниш -->
+  <div id="nichesSection" style="display: none;">
+    <div class="panel">
+      <h3 style="margin-top:0; margin-bottom: 12px;">🎯 Ниши</h3>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;">
+        <div class="autocomplete-wrap">
+          <input type="text" id="nicheSearchInput" placeholder="Введите нишу для поиска (нечеткий поиск)..." oninput="nicheAutocomplete(this.value)">
+          <div class="fuzzy-hint" id="fuzzyHint"></div>
+        </div>
+        <button class="btn btn-green" onclick="addNicheManual()">➕ Добавить нишу</button>
+      </div>
+      <div class="channels-status" id="nichesStatus"></div>
+    </div>
+    <div id="nichesContainer" class="collections-grid"></div>
+  </div>
+
+  <!-- 📁 Секция Подборок -->
+  <div id="collectionsSection" style="display: none;">
+    <div class="panel">
+      <h3 style="margin-top:0; margin-bottom: 12px;">📁 Подборки каналов</h3>
+      <div class="collections-toolbar">
+        <input type="text" id="collectionNameInput" placeholder="Название подборки" style="flex:1; min-width: 160px;">
+        <input type="text" id="collectionDescInput" placeholder="Описание (необязательно)" style="flex:1; min-width: 160px;">
+        <button class="btn btn-green" onclick="createCollection()">➕ Создать</button>
+      </div>
+      <div class="autocomplete-wrap" style="margin-bottom: 12px;">
+        <input type="text" id="collectionSearchInput" placeholder="Искать нишу для добавления каналов в подборку..." oninput="collectionNicheAutocomplete(this.value)">
+        <div class="fuzzy-hint" id="collectionFuzzyHint"></div>
+      </div>
+      <div class="channels-status" id="collectionsStatus"></div>
+    </div>
+    <div id="collectionsContainer" class="collections-grid">
+      <!-- Карточки подборок рендерятся сюда, под ними может быть полноэкранный просмотр -->
+    </div>
+    <div id="collectionFullView" class="collection-full-results" style="display: none;">
+      <div class="full-results-header">
+        <h3 style="margin:0;" id="collectionFullTitle">📁 Результаты</h3>
+        <button class="btn btn-sm" onclick="closeCollectionFullView()">✕ Закрыть просмотр</button>
+      </div>
+      <div class="controls">
+        <input type="text" id="collectionFullSearch" style="flex: 2;" placeholder="Поиск по названию или каналу..." oninput="renderCollectionVideos()">
+        <select id="collectionFullSort" onchange="renderCollectionVideos()">
+          <option value="newest" selected>⚡ Сначала новые (NEW / Дата)</option>
+          <option value="pubDate">📅 По дате публикации (свежие ↓)</option>
+          <option value="ratio">🔥 По вирусу (Ratio ↓)</option>
+          <option value="views">👁️ По просмотрам ↓</option>
+          <option value="gain">📈 По приросту 24ч ↓</option>
+        </select>
+        <select id="collectionFullViewType" onchange="renderCollectionVideos()">
+          <option value="table" selected>📄 Таблица</option>
+          <option value="grid">🔲 Плитка</option>
+        </select>
+        <label class="toggle-box">
+          <input type="checkbox" id="collectionFullThumbs" onchange="renderCollectionVideos()">
+          🖼️ Показать превью
+        </label>
+        <span id="collectionFullCount" style="color: var(--text-sub); font-size: 0.85rem;">0</span>
+      </div>
+      <div id="collectionFullContainer"></div>
+    </div>
+  </div>
+
+  <!-- Секция Базы Каналов -->
+  <div id="channelsSection" style="display: none;">
+    <div class="channels-toolbar">
+      <label><input type="checkbox" id="selectAllChannels" onchange="toggleSelectAllChannels(this)"> Выбрать всё (по фильтру)</label>
+      <button class="btn btn-blue btn-sm" title="Использует RSS + кэш прошлых метрик (минимум квоты)" onclick="runRssScanSelectedWithMode('fast')">⚡ RSS Скан (выбранные, fast)</button>
+      <button class="btn btn-orange btn-sm" title="Все включённые каналы, быстро (кэш)" onclick="runRssScanAllWithMode('fast')">🌐 RSS Скан (все, fast)</button>
+      <button class="btn btn-warn btn-sm" title="Полная перепроверка всех видео через API (тратит квоту ~1 unit/пакет)" onclick="runRssScanAllWithMode('deep')">🔥 Глубокий (все, deep)</button>
+      <button class="btn btn-green btn-sm" title="Создать новую подборку из отмеченных галочками каналов" onclick="createCollectionFromSelected()">📁 Создать подборку из выбранных</button>
+      <span id="selectedChannelsCount" style="color: var(--text-sub); font-size: 0.85rem;">Выбрано: 0</span>
+    </div>
+    <div class="channels-status" id="channelsRssStatus"></div>
+    <div class="controls">
+      <input type="text" id="channelSearchInput" style="flex: 2;" placeholder="Поиск по названию канала... " oninput="renderChannels()">
+      <select id="channelNicheFilter" onchange="renderChannels()">
+        <option value="ALL">📁 Все ниши каналов</option>
+      </select>
+      <datalist id="nichesForChannels"></datalist>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px;"><input type="checkbox" id="selectAllHeader" title="Выбрать все отображаемые" onchange="toggleSelectAllHeader(this)"></th>
+            <th>Канал</th>
+            <th>Ниша</th>
+            <th>Подписчики</th>
+            <th>Создан</th>
+            <th>Ср. просмотры</th>
+            <th>Добавлен</th>
+            <th>RSS Проверка</th>
+            <th>Действие</th>
+          </tr>
+        </thead>
+        <tbody id="channelsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let rawData = [];
+    let channelsData = [];
+    let searchTimerInterval = null;
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '-';
+      return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function switchTab(tab) {
+      document.getElementById('tabVideosBtn').className = tab === 'videos' ? 'tab-btn active' : 'tab-btn';
+      document.getElementById('tabNichesBtn').className = tab === 'niches' ? 'tab-btn active' : 'tab-btn';
+      document.getElementById('tabCollectionsBtn').className = tab === 'collections' ? 'tab-btn active' : 'tab-btn';
+      document.getElementById('tabFindChannelsBtn').className = tab === 'findChannels' ? 'tab-btn active' : 'tab-btn';
+      document.getElementById('tabChannelsBtn').className = tab === 'channels' ? 'tab-btn active' : 'tab-btn';
+      
+      document.getElementById('viralSearchPanel').style.display = tab === 'videos' ? 'block' : 'none';
+      document.getElementById('videosSection').style.display = tab === 'videos' ? 'block' : 'none';
+      
+      document.getElementById('nichesSection').style.display = tab === 'niches' ? 'block' : 'none';
+      document.getElementById('collectionsSection').style.display = tab === 'collections' ? 'block' : 'none';
+      
+      document.getElementById('findChannelsSection').style.display = tab === 'findChannels' ? 'block' : 'none';
+      document.getElementById('channelsSection').style.display = (tab === 'channels' || tab === 'findChannels') ? 'block' : 'none';
+
+      if (tab === 'niches') loadNiches();
+      if (tab === 'collections') loadCollections();
+    }
+
+    async function updateQuotaDisplay() {
+      try {
+        const res = await fetch('/api/quota');
+        const data = await res.json();
+        document.getElementById('quotaVal').innerText = data.remaining.toLocaleString('ru-RU');
+      } catch (e) {}
+    }
+
+    async function loadChannels() {
+      try {
+        const res = await fetch('/api/channels');
+        channelsData = await res.json();
+        document.getElementById('channelCount').innerText = channelsData.length;
+
+        const niches = Array.from(new Set(channelsData.map(c => c.niche).filter(Boolean)));
+        
+        const rssSelect = document.getElementById('rssTargetNiche');
+        rssSelect.innerHTML = '<option value="ALL">🌐 Все ниши и каналы</option>' + 
+          niches.map(n => `<option value="${n}">📁 Ниша: ${n}</option>`).join('');
+
+        const channelNicheFilter = document.getElementById('channelNicheFilter');
+        channelNicheFilter.innerHTML = '<option value="ALL">📁 Все ниши каналов</option>' + 
+          niches.map(n => `<option value="${n}">${n}</option>`).join('');
+
+        const channelNicheDatalist = document.getElementById('nichesForChannels');
+        if (channelNicheDatalist) {
+          channelNicheDatalist.innerHTML = niches.map(n => `<option value="${escapeHtml(n)}"></option>`).join('');
+        }
+
+        renderChannels();
+      } catch (e) {}
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch('/api/shorts');
+        const data = await res.json();
+        rawData = data.videos || [];
+        
+        const uniqueNiches = Array.from(new Set(rawData.map(v => v.niche).filter(Boolean)));
+        const nicheFilter = document.getElementById('nicheFilter');
+        nicheFilter.innerHTML = '<option value="ALL">📁 Все ниши</option>' +
+          uniqueNiches.map(n => `<option value="${n}">${n}</option>`).join('');
+
+        renderVideos();
+      } catch (e) {}
+    }
+
+    async function runRssScan(channelId = null, channelIds = null, opts = {}) {
+      const status = document.getElementById('channelsRssStatus') || document.getElementById('statusMsg');
+      const mode = opts.mode === 'deep' ? 'deep' : 'fast';
+      const selectedNiche = opts.niche
+        || document.getElementById('rssTargetNiche')?.value
+        || document.getElementById('channelNicheFilter')?.value
+        || 'ALL';
+
+      status.innerText = mode === 'deep'
+        ? '⏳ 🔥 Глубокий RSS-скан: полная перепроверка всех видео через API...'
+        : '⏳ Проверяем RSS-ленты каналов (fast, кэш метрик)...';
+
+      const payload = { mode };
+      if (opts.collectionId) {
+        payload.collectionId = opts.collectionId;
+        const coll = collectionsCache.find(c => c.id === opts.collectionId);
+        status.innerText = `⏳ ${mode === 'deep' ? '🔥' : '📁'} Сканируем подборку «${coll?.name || opts.collectionId}» [${mode}]...`;
+      } else if (Array.isArray(channelIds) && channelIds.length > 0) {
+        payload.channelIds = channelIds;
+        status.innerText = `⏳ ${mode === 'deep' ? '🔥' : '⚡'} Сканируем RSS выбранных каналов (${channelIds.length}) [${mode}]...`;
+      } else if (channelId) {
+        payload.channelId = channelId;
+      } else if (opts.all === true) {
+        payload.all = true;
+        status.innerText = `⏳ ${mode === 'deep' ? '🔥' : '🌐'} Массовое RSS-сканирование всех включённых каналов [${mode}]...`;
+      } else if (selectedNiche && selectedNiche !== 'ALL') {
+        payload.niche = selectedNiche;
+      }
+
+      try {
+        const res = await fetch('/api/scan-rss', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          status.innerHTML = `<span style="color: #ff0050;">❌ ${data.error || 'Ошибка сканирования'}</span>`;
+          return;
+        }
+        status.innerHTML = `<span style="color: #00ff88;">✅ ${data.message}</span>`;
+
+        document.getElementById('sortSelect').value = 'newest';
+        await loadData();
+        await loadChannels();
+        // Подборки тоже перечитываем — обновилось количество и сами результаты скана
+        if (opts.collectionId) {
+          await loadCollections();
+        }
+        await updateQuotaDisplay();
+      } catch (err) {
+        status.innerHTML = `<span style="color: #ff0050;">❌ Ошибка запроса: ${err.message}</span>`;
+      }
+    }
+
+    async function handleChannelSearch(e) {
+      e.preventDefault();
+      const nicheName = document.getElementById('channelNicheInput').value;
+      const keywords = document.getElementById('channelKeywordsInput').value.split(',').map(k => k.trim()).filter(Boolean);
+      
+      const btn = document.getElementById('submitChannelBtn');
+      const status = document.getElementById('channelStatusMsg');
+
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+      status.innerText = '⏳ Ищем тематические каналы через YouTube API...';
+
+      try {
+        const res = await fetch('/api/search-channels', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nicheName, keywords })
+        });
+        const result = await res.json();
+
+        status.innerHTML = `<span style="color: #00ff88;">✅ ${result.message}</span>`;
+        await loadChannels();
+        await updateQuotaDisplay();
+      } catch (err) {
+        status.innerHTML = `<span style="color: #ff0050;">❌ Ошибка: ${err.message}</span>`;
+      } finally {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    }
+
+    async function handleSearch(e) {
+      e.preventDefault();
+      const nicheName = document.getElementById('nicheInput').value;
+      const keywords = document.getElementById('keywordsInput').value.split(',').map(k => k.trim()).filter(Boolean);
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const status = document.getElementById('statusMsg');
+
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.6';
+      submitBtn.style.cursor = 'not-allowed';
+      
+      let seconds = 0;
+      const steps = [
+        '🔎 Отправляем запрос к YouTube API...',
+        '📊 Находим виральные Shorts...',
+        '⏳ Запрашиваем статистику каналов и проверяем видео...',
+        '🔥 Рассчитываем коэффициент вирусоемкости (Outlier Ratio)...',
+        '💾 Сохраняем новые данные...'
+      ];
+
+      let stepIdx = 0;
+      status.innerText = `⏳ [0s] ${steps[0]}`;
+      
+      clearInterval(searchTimerInterval);
+      searchTimerInterval = setInterval(() => {
+        seconds++;
+        if (seconds % 4 === 0 && stepIdx < steps.length - 1) {
+          stepIdx++;
+        }
+        status.innerText = `⏳ [${seconds}s] ${steps[stepIdx]}`;
+        submitBtn.innerText = `⏳ Идет сканирование... (${seconds}s)`;
+      }, 1000);
+
+      try {
+        const res = await fetch('/api/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nicheName, keywords })
+        });
+
+        const result = await res.json();
+
+        clearInterval(searchTimerInterval);
+        status.innerHTML = `<span style="color: #00ff88;">✅ Сканирование завершено за ${seconds} сек! ${result.message || ''}</span>`;
+
+        await loadData();
+        await loadChannels();
+        await updateQuotaDisplay();
+
+      } catch (err) {
+        clearInterval(searchTimerInterval);
+        status.innerHTML = `<span style="color: #ff0050;">❌ Ошибка при сканировании: ${err.message}</span>`;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+        submitBtn.innerText = 'Найти виральные видео по API';
+      }
+    }
+
+    function renderChannels() {
+      const tbody = document.getElementById('channelsTableBody');
+      const search = (document.getElementById('channelSearchInput')?.value || '').toLowerCase();
+      const selectedNiche = document.getElementById('channelNicheFilter')?.value || 'ALL';
+
+      const filteredChannels = channelsData.filter(c => {
+        const matchesSearch = (c.channelTitle || '').toLowerCase().includes(search);
+        const matchesNiche = selectedNiche === 'ALL' || c.niche === selectedNiche;
+        return matchesSearch && matchesNiche;
+      });
+
+      tbody.innerHTML = filteredChannels.map(c => `
+        <tr>
+          <td style="text-align: center;">
+            <input type="checkbox" class="channel-select" value="${c.channelId}" onchange="updateSelectedChannelsCount()">
+          </td>
+          <td>
+            <strong>
+              <a href="#" onclick="event.preventDefault(); searchChannelVideos('${encodeURIComponent(c.channelTitle)}')" title="Показать виральные видео этого канала (на вкладке «Виральные Shorts»)" style="color: var(--text); text-decoration: none;">
+                ${escapeHtml(c.channelTitle)}
+              </a>
+            </strong><br>
+            <a href="https://www.youtube.com/channel/${c.channelId}" target="_blank" style="color:#888; font-size:0.78rem;">Открыть канал на YouTube ↗</a>
+          </td>
+          <td>
+            <input list="nichesForChannels" class="channel-niche-input" value="${escapeHtml(c.niche || '')}"
+                   data-channel-id="${c.channelId}" data-channel-title="${encodeURIComponent(c.channelTitle)}"
+                   data-old-niche="${escapeHtml(c.niche || '')}"
+                   onchange="changeChannelNiche(this)" title="Изменить нишу канала (можно ввести новую)">
+          </td>
+          <td><strong>${c.subscribers !== undefined && c.subscribers !== null ? c.subscribers.toLocaleString('ru-RU') : '-'}</strong></td>
+          <td class="date-cell">${formatDate(c.publishedAt)}</td>
+          <td>${(c.channelAverageViews || 0).toLocaleString('ru-RU')}</td>
+          <td class="date-cell">${c.addedAt ? formatDate(c.addedAt) : '-'}</td>
+          <td class="date-cell">${c.lastRssCheck ? new Date(c.lastRssCheck).toLocaleString('ru-RU') : 'Ещё не проверялся'}</td>
+          <td>
+            <button class="btn btn-green btn-sm" onclick="runRssScan('${c.channelId}')">⚡ RSS Сканирование</button>
+            <a href="https://www.youtube.com/channel/${c.channelId}" target="_blank" style="color:#fff; margin-left: 8px; font-size: 0.85rem;">Открыть ↗</a>
+          </td>
+        </tr>
+      `).join('');
+
+      updateSelectedChannelsCount();
+    }
+
+    async function changeChannelNiche(inputEl) {
+      const channelId = inputEl.dataset.channelId;
+      const channelTitle = decodeURIComponent(inputEl.dataset.channelTitle || '');
+      const newNiche = String(inputEl.value || '').trim();
+      if (!newNiche) {
+        inputEl.value = inputEl.dataset.oldNiche || '';
+        alert('⚠️ Ниша не может быть пустой.');
+        return;
+      }
+      if (newNiche === (inputEl.dataset.oldNiche ?? '')) return;
+      try {
+        const res = await fetch('/api/channels/' + encodeURIComponent(channelId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ niche: newNiche })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert('❌ ' + (data.error || 'Ошибка') + (data.details ? ': ' + data.details : ''));
+          inputEl.value = inputEl.dataset.oldNiche || '';
+          renderChannels();
+          return;
+        }
+        const statusEl = document.getElementById('channelsRssStatus');
+        if (statusEl) statusEl.innerHTML = `✅ Канал ${channelTitle ? `«${channelTitle}»` : ''} переведён в нишу «${data.channel?.niche ?? newNiche}»`;
+        inputEl.dataset.oldNiche = data.channel?.niche ?? newNiche;
+        // Обновляем кэш на клиенте
+        const ch = channelsData.find(x => x.channelId === channelId);
+        if (ch) ch.niche = data.channel?.niche ?? newNiche;
+        loadChannels(); // перестроит фильтры и список ниш
+      } catch (e) {
+        alert('❌ ' + e.message);
+      }
+    }
+
+    function updateSelectedChannelsCount() {
+      const selected = Array.from(document.querySelectorAll('.channel-select:checked')).map(el => el.value);
+      const el = document.getElementById('selectedChannelsCount');
+      if (el) el.innerText = selected.length > 0 ? `Выбрано: ${selected.length}` : 'Выбрано: 0';
+      return selected;
+    }
+
+    function toggleSelectAllChannels(checkAll) {
+      document.querySelectorAll('.channel-select').forEach(cb => { cb.checked = checkAll.checked; });
+      updateSelectedChannelsCount();
+    }
+
+    function toggleSelectAllHeader(checkAll) {
+      document.querySelectorAll('.channel-select').forEach(cb => { cb.checked = checkAll.checked; });
+      document.getElementById('selectAllChannels').checked = checkAll.checked;
+      updateSelectedChannelsCount();
+    }
+
+    async function runRssScanSelectedWithMode(mode = 'fast') {
+      const channelIds = updateSelectedChannelsCount();
+      if (channelIds.length === 0) {
+        alert('⚠️ Выберите хотя бы один канал (галочки в таблице).');
+        return;
+      }
+      await runRssScan(null, channelIds, { mode });
+    }
+
+    async function runRssScanSelected() {
+      await runRssScanSelectedWithMode('fast');
+    }
+
+    async function createCollectionFromSelected() {
+      const channelIds = updateSelectedChannelsCount();
+      if (channelIds.length === 0) {
+        alert('⚠️ Сначала отметьте галочками хотя бы один канал в таблице.');
+        return;
+      }
+      const name = prompt('Название новой подборки:', `Подборка ${channelIds.length} каналов`);
+      if (!name || !name.trim()) return;
+      try {
+        const res = await fetch('/api/collections', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name.trim(), channelIds })
+        });
+        const data = await res.json();
+        if (!res.ok) { alert('❌ ' + (data.error || 'Ошибка создания')); return; }
+        setCollectionsStatus(`✅ Подборка «${data.collection.name}» создана из ${channelIds.length} каналов`);
+        await loadCollections();
+        // Переключаемся на вкладку подборок, чтобы сразу увидеть новую подборку
+        switchTab('collections');
+        // Раскрываем результаты (в карточке они уже должны быть видны)
+        const el = document.getElementById('collResults_' + encodeURIComponent(data.collection.id));
+        if (el && !el.classList.contains('open')) el.classList.add('open');
+      } catch (e) {
+        alert('❌ Ошибка: ' + e.message);
+      }
+    }
+
+    async function runRssScanAllWithMode(mode = 'fast') {
+      await runRssScan(null, null, { all: true, mode });
+    }
+
+    async function runRssScanAll() {
+      await runRssScanAllWithMode('fast');
+    }
+
+    function playInline(btn, videoId) {
+      const box = btn.closest('.thumbnail-box');
+      if (!box || !videoId) return;
+      box.innerHTML = `
+        <iframe src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen class="inline-player"></iframe>
+        <button class="close-player" title="Закрыть плеер" onclick="closeInline(this)">✕</button>`;
+    }
+
+    function closeInline(btn) {
+      const box = btn.closest('.thumbnail-box');
+      if (!box) return;
+      const vid = box.dataset.vid || '';
+      const thumb = box.dataset.thumb || '';
+      box.innerHTML = `
+        <img src="${thumb}" class="thumbnail-img" loading="lazy" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${vid}/hqdefault.jpg';">
+        ${vid ? `<button class="play-overlay" title="▶ Смотреть здесь" onclick="playInline(this, '${vid}')">▶</button>` : ''}`;
+    }
+
+    // ─── 🎯 Ниши ───
+    let nichesCache = [];
+
+    async function loadNiches() {
+      try {
+        const res = await fetch('/api/niches');
+        const data = await res.json();
+        nichesCache = Array.isArray(data) ? data : (data.niches || []);
+        renderNiches();
+      } catch (e) {
+        setNicheStatus('❌ Ошибка загрузки ниш: ' + e.message, true);
+      }
+    }
+
+    function setNicheStatus(msg, isError = false) {
+      const el = document.getElementById('nichesStatus');
+      if (el) el.innerHTML = `<span style="color: ${isError ? '#ff0050' : '#00ff88'};">${msg}</span>`;
+    }
+
+    function renderNiches() {
+      const container = document.getElementById('nichesContainer');
+      if (!container) return;
+      if (!nichesCache.length) {
+        container.innerHTML = '<div class="channels-status">Пока нет ниш. Добавьте первую!</div>';
+        return;
+      }
+      container.innerHTML = nichesCache.map(n => {
+        const encName = encodeURIComponent(n.name || n);
+        const chans = Array.isArray(n.channels) ? n.channels : [];
+        return `
+        <div class="collection-card" data-niche-name="${escapeHtml(n.name || n)}">
+          <h4>🎯 ${escapeHtml(n.name || n)}</h4>
+          <div class="collection-desc">Каналов: <strong>${chans.length}</strong> · Видео: <strong>${n.videoCount ?? '-'}</strong></div>
+          <div class="niche-channels-container" id="nicheChans_${encName}">
+            ${chans.map(ch => `
+              <div class="niche-chan-row" title="${ch.channelTitle ? `«${escapeHtml(ch.channelTitle)}» — клик: показать ролики канала` : ''}">
+                <span style="flex:1; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="searchChannelVideos('${encodeURIComponent(ch.channelTitle)}')">📺 ${escapeHtml(ch.channelTitle)}${ch.subscribers ? ` <span style="color:var(--text-sub);font-size:0.75rem;">(${Number(ch.subscribers).toLocaleString('ru-RU')} подп.)</span>` : ''}</span>
+                <button class="chan-remove" title="Убрать канал из ниши" onclick="removeChannelFromNiche('${encName}', '${encodeURIComponent(ch.channelId)}')">✕</button>
+              </div>
+            `).join('') || '<span style="color:var(--text-sub)">Каналы не найдены в базе.</span>'}
+            <button class="collection-add-channel" onclick="openAddChannelToNiche('${encName}')">➕ Добавить канал в нишу</button>
+          </div>
+          <div class="collection-actions">
+            <button class="btn btn-blue btn-sm" onclick="toggleNicheChannels('${encName}')">👁 Каналы (${chans.length})</button>
+            <button class="btn btn-green btn-sm" onclick="openAddChannelToNiche('${encName}')">➕ Канал</button>
+            <button class="btn btn-blue btn-sm" onclick="runRssScanForNiche('${encName}')">⚡ RSS-скан ниши</button>
+            <button class="btn btn-warn btn-sm" onclick="deleteNiche('${encName}')">🗑️ Удалить</button>
+          </div>
+        </div>
+      `;
+      }).join('');
+    // Восстанавливаем раскрытый список каналов ниши (если пользователь его открыл)
+      if (lastActiveNicheChannels) {
+        const opened = document.getElementById('nicheChans_' + encodeURIComponent(lastActiveNicheChannels));
+        if (opened) opened.classList.add('open');
+      }
+    }
+
+    // ─── Управление каналами ниши (раскрыть список / убрать канал) ───
+    function toggleNicheChannels(encName) {
+      const el = document.getElementById('nicheChans_' + encName);
+      if (el) el.classList.toggle('open');
+    }
+
+    async function removeChannelFromNiche(encName, encChannelId) {
+      const channelId = decodeURIComponent(encChannelId);
+      const nicheName = decodeURIComponent(encName);
+      const ch = Array.isArray(channelsData) ? channelsData.find(x => x.channelId === channelId) : null;
+      if (!confirm(`Убрать канал ${ch ? `«${ch.channelTitle}»` : channelId} из ниши «${nicheName}»?`)) return;
+      try {
+        const res = await fetch('/api/channels/' + encodeURIComponent(channelId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ niche: '' })
+        });
+        const data = await res.json();
+        if (!res.ok) { setNicheStatus('❌ ' + (data.error || 'Ошибка'), true); return; }
+        setNicheStatus(`✅ Канал ${ch ? `«${ch.channelTitle}»` : ''} убран из ниши «${nicheName}»`);
+        await refreshAfterNicheChange(nicheName);
+      } catch (e) {
+        setNicheStatus('❌ ' + e.message, true);
+      }
+    }
+
+    // После изменения ниш: обновляем кэш каналов, таблицу «База каналов», список ниш
+    let lastActiveNicheChannels = ''; // имя ниши, у которой открыт список каналов
+    async function refreshAfterNicheChange(activeNiche) {
+      lastActiveNicheChannels = activeNiche;
+      await loadChannels();
+      await loadNiches();
+    }
+
+    // ─── Модалка добавления канала в нишу ───
+    let nicheModalChannelName = '';
+    let nicheModalSelected = [];
+
+    function openAddChannelToNiche(encName) {
+      const name = decodeURIComponent(encName);
+      nicheModalChannelName = name;
+      nicheModalSelected = [];
+      document.getElementById('nicheModalName').textContent = name;
+      const searchEl = document.getElementById('nicheModalChannelSearch');
+      if (searchEl) searchEl.value = '';
+      const manualEl = document.getElementById('nicheModalManualChannel');
+      if (manualEl) manualEl.value = '';
+      const resultsEl = document.getElementById('nicheModalChannelResults');
+      if (resultsEl) resultsEl.innerHTML = '<div style="color:var(--text-sub);">Введите минимум 2 символа, чтобы найти канал в базе. Либо вставьте ID канала ниже.</div>';
+      const overlay = document.getElementById('nicheChannelModal');
+      if (overlay) overlay.removeAttribute('hidden');
+    }
+
+    function closeNicheChannelModal() {
+      const overlay = document.getElementById('nicheChannelModal');
+      if (overlay) overlay.setAttribute('hidden', '');
+      nicheModalChannelName = '';
+      nicheModalSelected = [];
+    }
+
+    function nicheModalSearchChannels(query) {
+      const q = String(query || '').trim().toLowerCase();
+      const resultsEl = document.getElementById('nicheModalChannelResults');
+      if (!resultsEl) return;
+      if (q.length < 2) {
+        resultsEl.innerHTML = '<div style="color:var(--text-sub);">Введите минимум 2 символа, чтобы найти канал в базе.</div>';
+        return;
+      }
+      const found = (Array.isArray(channelsData) ? channelsData : []).filter(ch =>
+        String(ch.channelTitle || '').toLowerCase().includes(q) ||
+        String(ch.niche || '').toLowerCase().includes(q)
+      ).slice(0, 15);
+      if (!found.length) {
+        resultsEl.innerHTML = '<div style="color:var(--text-sub);">По запросу ничего не найдено.</div>';
+        return;
+      }
+      resultsEl.innerHTML = found.map(ch => {
+        const already = nicheModalSelected.includes(ch.channelId);
+        const inThisNiche = String(ch.niche || '').trim().toLowerCase() === nicheModalChannelName.trim().toLowerCase();
+        return `
+          <label class="modal-result-item" style="display:flex; align-items:center; gap:8px; padding:4px 6px; border-radius:6px; cursor:pointer;">
+            <input type="checkbox" class="niche-modal-check" value="${encodeURIComponent(ch.channelId)}" data-title="${encodeURIComponent(ch.channelTitle)}" ${already ? 'checked' : ''} onchange="nicheModalToggleSelected(this)">
+            <span style="flex:1; overflow:hidden; text-overflow:ellipsis;">📺 ${escapeHtml(ch.channelTitle)} ${inThisNiche ? '<span style="color:var(--accent);font-size:0.75rem;">(уже в нише)</span>' : ''}</span>
+            <span style="color:var(--text-sub); font-size:0.75rem;">${escapeHtml(ch.niche || '—')}</span>
+          </label>`;
+      }).join('');
+    }
+
+    function nicheModalToggleSelected(el) {
+      const id = decodeURIComponent(el.value);
+      const title = decodeURIComponent(el.dataset.title || '');
+      if (el.checked) {
+        if (!nicheModalSelected.includes(id)) nicheModalSelected.push(id);
+        setNicheStatus(`➕ Отмечен канал ${title ? `«${title}»` : id} — нажмите «Готово».`);
+      } else {
+        nicheModalSelected = nicheModalSelected.filter(x => x !== id);
+      }
+    }
+
+    async function nicheModalAddManual() {
+      const inputEl = document.getElementById('nicheModalManualChannel');
+      const value = inputEl ? String(inputEl.value || '').trim() : '';
+      if (!value) return;
+      if (/^(UC|UU|UCP|PU)[A-Za-z0-9_-]{10,}$/.test(value)) {
+        if (!nicheModalSelected.includes(value)) nicheModalSelected.push(value);
+        inputEl.value = '';
+        setNicheStatus(`➕ Канал ${value} отмечен напрямую по ID.`);
+        return;
+      }
+      const found = (Array.isArray(channelsData) ? channelsData : []).filter(ch =>
+        String(ch.channelTitle || '').toLowerCase().includes(value.toLowerCase())
+      );
+      if (found.length === 1) {
+        if (!nicheModalSelected.includes(found[0].channelId)) nicheModalSelected.push(found[0].channelId);
+        inputEl.value = '';
+        setNicheStatus(`➕ Найден канал «${found[0].channelTitle}» в базе — отмечен.`);
+      } else if (found.length > 1) {
+        setNicheStatus(`⚠️ Найдено несколько каналов по «${value}». Уточните запрос или вставьте ID.`, true);
+      } else {
+        setNicheStatus(`❌ Канал «${value}» не найден в базе. Вставьте ID (UC...), чтобы добавить напрямую.`, true);
+      }
+    }
+
+    async function nicheModalCommit() {
+      const channelIds = nicheModalSelected.slice();
+      nicheModalSelected = [];
+      if (!channelIds.length) {
+        closeNicheChannelModal();
+        setNicheStatus('⚠️ Ничего не выбрано для добавления.');
+        return;
+      }
+      const nicheName = nicheModalChannelName;
+      let okCount = 0, skipCount = 0, errs = [];
+      for (const channelId of channelIds) {
+        const ch = Array.isArray(channelsData) ? channelsData.find(c => c.channelId === channelId) : null;
+        const curNiche = String(ch?.niche || '').trim().toLowerCase();
+        if (curNiche === nicheName.trim().toLowerCase()) { skipCount++; continue; }
+        try {
+          const res = await fetch('/api/channels/' + encodeURIComponent(channelId), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ niche: nicheName })
+          });
+          const data = await res.json();
+          if (!res.ok) { errs++; setNicheStatus('❌ ' + (data.error || 'Ошибка'), true); continue; }
+          okCount++;
+        } catch (e) {
+          errs++;
+          setNicheStatus('❌ ' + e.message, true);
+        }
+      }
+      closeNicheChannelModal();
+      if (okCount) setNicheStatus(`✅ Добавлено каналов в нишу «${nicheName}»: ${okCount}${skipCount ? `, пропущено (уже в нише): ${skipCount}` : ''}${errs ? `, ошибок: ${errs}` : ''}`);
+      else if (skipCount) setNicheStatus(`ℹ️ Все выбранные каналы уже в нише «${nicheName}» (${skipCount})`);
+      else if (errs) setNicheStatus('❌ Ничего не удалось добавить.', true);
+      await refreshAfterNicheChange(nicheName);
+    }
+
+    async function addNicheManual() {
+      const name = (document.getElementById('collectionSearchInput')?.value || document.getElementById('nicheSearchInput')?.value || '').trim();
+      if (!name) { setNicheStatus('⚠️ Введите название ниши', true); return; }
+      try {
+        const res = await fetch('/api/niches', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        const data = await res.json();
+        if (!res.ok) { setNicheStatus('❌ ' + (data.error || 'Ошибка'), true); return; }
+        setNicheStatus(`✅ Ниша «${data.name}» добавлена`);
+        document.getElementById('collectionSearchInput').value = '';
+        document.getElementById('nicheSearchInput').value = '';
+        await loadNiches();
+      } catch (e) {
+        setNicheStatus('❌ ' + e.message, true);
+      }
+    }
+
+    async function deleteNiche(encodedName) {
+      const name = decodeURIComponent(encodedName);
+      if (!confirm(`Удалить нишу «${name}» и всю её статистику?`)) return;
+      try {
+        const res = await fetch('/api/niches', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        const data = await res.json();
+        if (!res.ok) { setNicheStatus('❌ ' + (data.error || 'Ошибка'), true); return; }
+        setNicheStatus(`✅ Ниша «${data.name}» удалена`);
+        await loadNiches();
+        await loadChannels();
+        await loadData();
+      } catch (e) {
+        setNicheStatus('❌ ' + e.message, true);
+      }
+    }
+
+    async function runRssScanForNiche(encodedName) {
+      const name = decodeURIComponent(encodedName);
+      await runRssScan(null, null, { niche: name, mode: 'fast' });
+    }
+
+    // 🔍 Нечеткий поиск ниш (серверный /api/niches/search)
+    let nicheAutocompleteTimer = null;
+    async function nicheSearchServer(query, hintEl, statusEl) {
+      if (!query || query.trim().length < 2) { hintEl.classList.remove('show'); return; }
+      try {
+        const res = await fetch('/api/niches/search?q=' + encodeURIComponent(query));
+        const data = await res.json();
+        if (!res.ok) { hintEl.classList.remove('show'); return; }
+        const results = Array.isArray(data) ? data : (data.results || []);
+        if (!results.length) { hintEl.classList.remove('show'); return; }
+        hintEl.innerHTML = results.map((r, i) => `
+          <div class="fuzzy-hint-item" data-fuzzy="${i}"
+            onmouseenter="highlightFuzzyHint(this)"
+            onclick="selectFuzzyNiche('${encodeURIComponent(r.name)}')">
+            ${escapeHtml(r.name)} <span class="fuzzy-tag">расст. ${r.distance === undefined ? '~' : r.distance}</span>
+          </div>`).join('');
+        hintEl.classList.add('show');
+        hintEl._results = results;
+      } catch (e) {
+        hintEl.classList.remove('show');
+      }
+    }
+
+    function highlightFuzzyHint(item) {
+      const hint = item.closest('.fuzzy-hint');
+      hint.querySelectorAll('.fuzzy-hint-item').forEach(el => el.classList.remove('selected'));
+      item.classList.add('selected');
+    }
+
+    function selectFuzzyNiche(encodedName) {
+      const name = decodeURIComponent(encodedName);
+      const visibleInput = document.getElementById('nichesSection').style.display === 'block'
+        ? document.getElementById('nicheSearchInput') : document.getElementById('collectionSearchInput');
+      visibleInput.value = name;
+      document.querySelectorAll('.fuzzy-hint').forEach(h => h.classList.remove('show'));
+    }
+
+    function nicheAutocomplete(value) {
+      clearTimeout(nicheAutocompleteTimer);
+      const hint = document.getElementById('fuzzyHint');
+      if (value.trim().length < 2) { hint.classList.remove('show'); return; }
+      nicheAutocompleteTimer = setTimeout(() => nicheSearchServer(value, hint, document.getElementById('nichesStatus')), 250);
+    }
+
+    function collectionNicheAutocomplete(value) {
+      clearTimeout(nicheAutocompleteTimer);
+      const hint = document.getElementById('collectionFuzzyHint');
+      if (value.trim().length < 2) { hint.classList.remove('show'); return; }
+      nicheAutocompleteTimer = setTimeout(() => nicheSearchServer(value, hint, document.getElementById('collectionsStatus')), 250);
+    }
+
+    // ─── 📁 Подборки ───
+    let collectionsCache = [];
+
+    function setCollectionsStatus(msg, isError = false) {
+      const el = document.getElementById('collectionsStatus');
+      if (el) el.innerHTML = `<span style="color: ${isError ? '#ff0050' : '#00ff88'};">${msg}</span>`;
+    }
+
+    async function loadCollections() {
+      try {
+        const res = await fetch('/api/collections');
+        const data = await res.json();
+        collectionsCache = Array.isArray(data) ? data : (data.collections || []);
+        renderCollections();
+      } catch (e) {
+        setCollectionsStatus('❌ Ошибка загрузки подборок: ' + e.message, true);
+      }
+    }
+
+    function renderCollections() {
+      const container = document.getElementById('collectionsContainer');
+      if (!container) return;
+      if (!collectionsCache.length) {
+        container.innerHTML = '<div class="channels-status">Пока нет подборок. Создайте первую!</div>';
+        return;
+      }
+      container.innerHTML = collectionsCache.map(c => `
+        <div class="collection-card">
+          <h4>📁 ${escapeHtml(c.name)} <span class="niche-tag" style="margin:0;">${c.channelIds?.length || 0} каналов</span></h4>
+          <div class="collection-desc">${escapeHtml(c.description || 'Без описания')}</div>
+          <div class="collection-stats">
+            <span>🎬 Видео: <strong>${c.videoCount ?? '-'}</strong></span>
+            ${c.lastScanAt ? `<span class="last-scan">⏱ Скан: ${new Date(c.lastScanAt).toLocaleString('ru-RU')}</span>` : ''}
+          </div>
+          <div class="collection-channels" id="collChans_${encodeURIComponent(c.id)}">
+            ${(c.channels || []).map(ch => `
+              <span class="chan-row" title="Показать ролики канала" onclick="searchChannelVideos('${encodeURIComponent(ch.channelTitle)}')">
+                <span style="flex:1; overflow:hidden; text-overflow:ellipsis;">📺 ${escapeHtml(ch.channelTitle)} <span style="color:var(--text-sub);font-size:0.75rem;">(${escapeHtml(ch.niche || '—')}${ch.subscribers ? `, подп. ${ch.subscribers.toLocaleString('ru-RU')}` : ''})</span></span>
+                <button class="chan-remove" title="Убрать канал из подборки" onclick="event.stopPropagation(); removeChannelFromCollection('${encodeURIComponent(c.id)}', '${encodeURIComponent(ch.channelId)}')">✕</button>
+              </span>
+            `).join('') || '<span style="color:var(--text-sub)">Каналы не найдены в базе.</span>'}
+            <button class="collection-add-channel" onclick="openAddChannelModal('${encodeURIComponent(c.id)}')">➕ Добавить канал в подборку</button>
+          </div>
+          <div class="collection-results" id="collResults_${encodeURIComponent(c.id)}">
+            <div class="collection-results-header">
+              <span>Топ роликов подборки</span>
+              <button class="btn btn-sm" onclick="exportCollection('${encodeURIComponent(c.id)}')">📤 Экспорт</button>
+            </div>
+            ${renderCollectionResults(c)}
+          </div>
+          <div class="collection-actions">
+            <button class="btn btn-blue btn-sm" onclick="toggleCollectionChannels('${encodeURIComponent(c.id)}')">👁 Каналы</button>
+            <button class="btn btn-green btn-sm" onclick="openCollectionFullView('${encodeURIComponent(c.id)}')">🔎 Открыть просмотр</button>
+            <button class="btn btn-blue btn-sm" onclick="openCollectionFullView('${encodeURIComponent(c.id)}')">📄 Все результаты (${c.videoCount ?? 0})</button>
+            <button class="btn btn-blue btn-sm" onclick="scanCollection('${encodeURIComponent(c.id)}')">⚡ RSS-скан</button>
+            <button class="btn btn-green btn-sm" onclick="openAddChannelModal('${encodeURIComponent(c.id)}')">➕ Канал</button>
+            <button class="btn btn-blue btn-sm" onclick="addNicheToCollection('${encodeURIComponent(c.id)}')">➕ Нишу</button>
+            <button class="btn btn-orange btn-sm" onclick="exportCollection('${encodeURIComponent(c.id)}')">📤 Экспорт</button>
+            <button class="btn btn-warn btn-sm" onclick="deleteCollection('${encodeURIComponent(c.id)}')">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function createCollection() {
+      const name = document.getElementById('collectionNameInput').value.trim();
+      const description = document.getElementById('collectionDescInput').value.trim();
+      if (!name) { setCollectionsStatus('⚠️ Введите название подборки', true); return; }
+      try {
+        const res = await fetch('/api/collections', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, description })
+        });
+        const data = await res.json();
+        if (!res.ok) { setCollectionsStatus('❌ ' + (data.error || 'Ошибка'), true); return; }
+        setCollectionsStatus(`✅ Подборка «${data.collection?.name || name}» создана`);
+        document.getElementById('collectionNameInput').value = '';
+        document.getElementById('collectionDescInput').value = '';
+        await loadCollections();
+      } catch (e) {
+        setCollectionsStatus('❌ ' + e.message, true);
+      }
+    }
+
+    async function deleteCollection(encodedId) {
+      const id = decodeURIComponent(encodedId);
+      if (!confirm(`Удалить подборку?`)) return;
+      try {
+        const res = await fetch('/api/collections/' + encodeURIComponent(id), { method: 'DELETE' });
+        const data = await res.json();
+        if (!res.ok) { setCollectionsStatus('❌ ' + (data.error || 'Ошибка'), true); return; }
+        setCollectionsStatus(`✅ Подборка удалена`);
+        await loadCollections();
+      } catch (e) {
+        setCollectionsStatus('❌ ' + e.message, true);
+      }
+    }
+
+    // ─── Управление каналами подборки ───
+    let modalCollectionId = null;
+    let modalSelected = [];
+
+    function openAddChannelModal(encodedId) {
+      const id = decodeURIComponent(encodedId);
+      modalCollectionId = id;
+      modalSelected = [];
+      const coll = collectionsCache.find(c => c.id === id);
+      const nameEl = document.getElementById('modalCollectionName');
+      if (nameEl) nameEl.innerText = coll ? `«${coll.name}»` : '';
+      const searchEl = document.getElementById('modalChannelSearch');
+      if (searchEl) searchEl.value = '';
+      const manualEl = document.getElementById('modalManualChannel');
+      if (manualEl) manualEl.value = '';
+      const resultsEl = document.getElementById('modalChannelResults');
+      if (resultsEl) resultsEl.innerHTML = '<div style="color:var(--text-sub);">Введите минимум 2 символа, чтобы найти канал в базе. Либо вставьте ID канала ниже.</div>';
+      const overlay = document.getElementById('addChannelModal');
+      if (overlay) overlay.removeAttribute('hidden');
+    }
+
+    function closeAddChannelModal() {
+      const overlay = document.getElementById('addChannelModal');
+      if (overlay) overlay.setAttribute('hidden', '');
+      modalCollectionId = null;
+      modalSelected = [];
+    }
+
+    function modalSearchChannels(query) {
+      const q = String(query || '').trim().toLowerCase();
+      const resultsEl = document.getElementById('modalChannelResults');
+      if (!resultsEl) return;
+      if (q.length < 2) {
+        resultsEl.innerHTML = '<div style="color:var(--text-sub);">Введите минимум 2 символа.</div>';
+        return;
+      }
+      const coll = collectionsCache.find(c => c.id === modalCollectionId);
+      const existing = new Set((coll?.channelIds || []).map(x => String(x)));
+      const matches = (Array.isArray(channelsData) ? channelsData : [])
+        .filter(ch => {
+          const title = String(ch.channelTitle || '').toLowerCase();
+          const niche = String(ch.niche || '').toLowerCase();
+          const id = String(ch.channelId || '').toLowerCase();
+          return title.includes(q) || niche.includes(q) || id.includes(q);
+        })
+        .slice(0, 50);
+      if (!matches.length) {
+        resultsEl.innerHTML = '<div style="color:var(--text-sub);">Ничего не найдено. Попробуйте вставить ID канала вручную ниже.</div>';
+        return;
+      }
+      const alreadySelected = (id) => modalSelected.includes(id);
+      resultsEl.innerHTML = matches.map(ch => `
+        <div class="m-result ${existing.has(String(ch.channelId)) || alreadySelected(String(ch.channelId)) ? 'added' : ''}"
+             onclick="modalToggleChannel('${encodeURIComponent(ch.channelId)}', '${encodeURIComponent(ch.channelTitle)}')">
+          <span class="m-title">📺 ${escapeHtml(ch.channelTitle)}</span>
+          <span class="m-meta">${escapeHtml(ch.niche || '—')}${existing.has(String(ch.channelId)) ? ' · уже в подборке' : (alreadySelected(String(ch.channelId)) ? ' · выбран' : '')}</span>
+        </div>
+      `).join('');
+    }
+
+    function modalToggleChannel(encId) {
+      const id = decodeURIComponent(encId);
+      const coll = collectionsCache.find(c => c.id === modalCollectionId);
+      const existing = new Set((coll?.channelIds || []).map(x => String(x)));
+      if (existing.has(id)) return; // уже в подборке — не трогаем
+      const idx = modalSelected.indexOf(id);
+      if (idx >= 0) modalSelected.splice(idx, 1);
+      else modalSelected.push(id);
+      const searchEl = document.getElementById('modalChannelSearch');
+      modalSearchChannels(searchEl ? searchEl.value : '');
+    }
+
+    async function modalAddManual() {
+      const inputEl = document.getElementById('modalManualChannel');
+      const value = inputEl ? String(inputEl.value || '').trim() : '';
+      if (!value) return;
+      const isId = /^UC[\w-]{10,}$/i.test(value);
+      if (isId) {
+        if (!modalSelected.includes(value)) modalSelected.push(value);
+        inputEl.value = '';
+        setCollectionsStatus(`➕ Канал ${value} отмечен. Нажмите «Готово».`);
+        return;
+      }
+      const found = (Array.isArray(channelsData) ? channelsData : []).filter(ch =>
+        String(ch.channelTitle || '').toLowerCase().includes(value.toLowerCase())
+      );
+      if (found.length === 1) {
+        if (!modalSelected.includes(found[0].channelId)) modalSelected.push(found[0].channelId);
+        inputEl.value = '';
+        setCollectionsStatus(`➕ Найден канал «${found[0].channelTitle}» в базе — отмечен.`);
+      } else if (found.length > 1) {
+        setCollectionsStatus(`⚠️ Найдено несколько каналов по «${value}». Уточните запрос или вставьте ID.`, true);
+      } else {
+        setCollectionsStatus(`❌ Канал «${value}» не найден в базе. Вставьте ID (UC...), чтобы добавить напрямую.`, true);
+      }
+    }
+
+    async function modalCommit() {
+      if (!modalCollectionId) return;
+      const channelIds = modalSelected.slice();
+      modalSelected = [];
+      if (!channelIds.length) {
+        closeAddChannelModal();
+        setCollectionsStatus('⚠️ Ничего не выбрано для добавления.');
+        return;
+      }
+      const id = modalCollectionId;
+      try {
+        const res = await fetch(`/api/collections/${encodeURIComponent(id)}/channels`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channelIds })
+        });
+        const data = await res.json();
+        if (!res.ok) { setCollectionsStatus('❌ ' + (data.error || 'Ошибка'), true); return; }
+        setCollectionsStatus(`✅ Добавлено каналов: ${data.added || 0}${data.skipped ? ` (${data.skipped} уже в подборке)` : ''}`);
+        closeAddChannelModal();
+        await loadCollections();
+      } catch (e) {
+        setCollectionsStatus('❌ ' + e.message, true);
+      }
+    }
+
+    async function removeChannelFromCollection(encodedId, encChannelId) {
+      const id = decodeURIComponent(encodedId);
+      const channelId = decodeURIComponent(encChannelId);
+      const coll = collectionsCache.find(c => c.id === id);
+      const ch = Array.isArray(coll?.channels) ? coll.channels.find(x => x.channelId === channelId) : null;
+      if (!confirm(`Убрать канал ${ch ? `«${ch.channelTitle}»` : channelId} из подборки?`)) return;
+      try {
+        const res = await fetch(`/api/collections/${encodeURIComponent(id)}/channels/${encodeURIComponent(channelId)}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        if (!res.ok) { setCollectionsStatus('❌ ' + (data.error || 'Ошибка'), true); return; }
+        setCollectionsStatus(`✅ Канал убран из подборки${data.removed ? '' : ' (возможно, уже не было)'}`);
+        await loadCollections();
+      } catch (e) {
+        setCollectionsStatus('❌ ' + e.message, true);
+      }
+    }
+
+    function toggleCollectionChannels(encodedId) {
+      const id = decodeURIComponent(encodedId);
+      const el = document.getElementById('collChans_' + encodeURIComponent(id));
+      if (!el) return;
+      el.classList.toggle('open');
+    }
+
+    function searchChannelVideos(encodedTitle) {
+      const title = decodeURIComponent(encodedTitle);
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) searchInput.value = title;
+      switchTab('videos');
+      renderVideos();
+    }
+
+    function renderCollectionResults(c) {
+      const vids = Array.isArray(c.results) ? c.results : [];
+      if (!vids.length) {
+        return '<span style="color:var(--text-sub)">Здесь появятся новые ролики. Нажмите <b>«⚡ RSS-скан»</b> ниже, чтобы найти их.</span>';
+      }
+      return `
+        <div class="collection-results-list">
+          ${vids.slice(0, 10).map(v => `
+            <a href="${v.url || ('https://www.youtube.com/watch?v=' + v.id)}" target="_blank" title="${escapeHtml(v.title)}">
+              <span class="result-title">▶ ${escapeHtml(v.title)}</span>
+              <span class="result-views">👁 ${(v.views || 0).toLocaleString('ru-RU')}</span>
+            </a>
+          `).join('')}
+        </div>
+        ${vids.length > 10
+          ? `<button class="btn btn-blue btn-sm" style="margin-top: 6px; display: block;" onclick="openCollectionFullView('${encodeURIComponent(c.id)}')">🔎 Показать все ${vids.length} результатов (полноценная таблица/плитка)</button>`
+          : ''}`;
+    }
+
+    // ─── Полноценный просмотр результатов подборки (по образцу виральных роликов) ───
+    let collectionFullCache = [];
+
+    function openCollectionFullView(encodedId) {
+      const id = decodeURIComponent(encodedId);
+      const coll = collectionsCache.find(c => c.id === id);
+      if (!coll) return;
+      collectionFullCache = Array.isArray(coll.results) ? coll.results : [];
+      document.getElementById('collectionFullTitle').innerText = `📁 Результаты подборки «${coll.name}» (${collectionFullCache.length})`;
+      document.getElementById('collectionFullView').style.display = 'block';
+      renderCollectionVideos();
+      // Прокручиваем к просмотру
+      document.getElementById('collectionFullView').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function closeCollectionFullView() {
+      document.getElementById('collectionFullView').style.display = 'none';
+      document.getElementById('collectionFullContainer').innerHTML = '';
+      collectionFullCache = [];
+    }
+
+    function renderCollectionVideos() {
+      const container = document.getElementById('collectionFullContainer');
+      if (!container) return;
+      if (!collectionFullCache.length) {
+        container.innerHTML = '<div class="channels-status">Пока нет результатов. Нажмите «⚡ RSS-скан» в карточке подборки.</div>';
+        return;
+      }
+      const viewType = document.getElementById('collectionFullViewType').value;
+      const showThumbnails = document.getElementById('collectionFullThumbs').checked;
+      const search = (document.getElementById('collectionFullSearch').value || '').toLowerCase();
+      const sort = document.getElementById('collectionFullSort').value;
+
+      let filtered = collectionFullCache.filter(v => {
+        const matchesSearch = (v.title || '').toLowerCase().includes(search) || (v.channelTitle || '').toLowerCase().includes(search);
+        return matchesSearch;
+      });
+
+      filtered.sort((a, b) => {
+        if (sort === 'newest') {
+          if (a.isNew !== b.isNew) return b.isNew ? 1 : -1;
+          return new Date(b.publishedAt || b.addedAt || 0) - new Date(a.publishedAt || a.addedAt || 0);
+        }
+        if (sort === 'pubDate') return new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0);
+        if (sort === 'ratio') return (b.outlierRatio || 0) - (a.outlierRatio || 0);
+        if (sort === 'views') return (b.views || 0) - (a.views || 0);
+        if (sort === 'gain') return ((b.views24hGain ?? b.viewsPerDay) || 0) - ((a.views24hGain ?? a.viewsPerDay) || 0);
+      });
+
+      document.getElementById('collectionFullCount').innerText = filtered.length;
+
+      if (viewType === 'grid') {
+        container.className = 'grid';
+        container.innerHTML = filtered.map(v => {
+          const gain = v.views24hGain ?? v.viewsPerDay ?? 0;
+          const thumbUrl = v.thumbnail || (v.id ? `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg` : '');
+          return `
+          <div class="card">
+            ${showThumbnails ? `
+              <div class="thumbnail-box" data-vid="${v.id || ''}" data-thumb="${thumbUrl}">
+                <img src="${thumbUrl}" class="thumbnail-img" loading="lazy" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${v.id || ''}/hqdefault.jpg';">
+                ${v.id ? `<button class="play-overlay" title="▶ Смотреть здесь" onclick="playInline(this, '${v.id}')">▶</button>` : ''}
+              </div>
+            ` : ''}
+            <div class="card-content">
+              <div>
+                ${v.niche ? `<span class="niche-tag">🏷️ ${v.niche}</span>` : ''}
+                ${v.isNew ? `<span class="badge-new">NEW</span>` : ''}
+                ${boomBadgeHtml(v)}
+                <div class="title">${v.title}</div>
+                <div class="channel">📺 ${v.channelTitle} • <span style="font-size:0.8rem; color:var(--text-sub);">📅 ${formatDate(v.publishedAt)}</span></div>
+                <div style="margin-bottom: 10px;">${renderSparkline(v)}</div>
+              </div>
+              <div>
+                <div class="stats">
+                  <div>
+                    Просмотры: <strong>${(v.views || 0).toLocaleString('ru-RU')}</strong>
+                    ${gainCellHtml(v)}
+                  </div>
+                  <div>Ratio: <strong style="color:var(--accent);">${v.outlierRatio || 0}x</strong></div>
+                </div>
+                <a href="${v.url}" target="_blank" class="btn-link">Смотреть ↗</a>
+              </div>
+            </div>
+          </div>
+        `}).join('');
+      } else {
+        container.className = 'table-container';
+        container.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                ${showThumbnails ? '<th>Превью</th>' : ''}
+                <th>Outlier Ratio</th>
+                <th>Название</th>
+                <th>Опубликовано</th>
+                <th>Ниша</th>
+                <th>Канал</th>
+                <th>Просмотры</th>
+                <th>Прирост 24ч</th>
+                <th>Тренд (24ч)</th>
+                <th>Ср. Канала</th>
+                <th>Ссылка</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map(v => {
+                const gain = v.views24hGain ?? v.viewsPerDay ?? 0;
+                return `
+                <tr>
+                  ${showThumbnails ? `
+                    <td><img src="${v.thumbnail || ''}" class="table-thumb" alt="thumb"></td>
+                  ` : ''}
+                  <td>
+                    <strong style="color: var(--accent); font-size: 1.1rem;">${v.outlierRatio || 0}x</strong>
+                  </td>
+                  <td style="max-width: 300px; font-weight: 500;">
+                    <a href="${v.url}" target="_blank" rel="noopener" style="color: var(--text); text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${v.title}</a>
+                    ${v.isNew ? `<span class="badge-new">NEW</span>` : ''}
+                    ${boomBadgeHtml(v)}
+                  </td>
+                  <td class="date-cell">📅 ${formatDate(v.publishedAt)}</td>
+                  <td>${v.niche ? `<span class="niche-tag" style="margin: 0;">${v.niche}</span>` : '-'}</td>
+                  <td style="color: var(--text-sub);">${v.channelTitle} ${v.foundVia ? '(RSS)' : ''}</td>
+                  <td><strong>${(v.views || 0).toLocaleString('ru-RU')}</strong></td>
+                  <td>
+                    ${gainCellHtml(v)}
+                  </td>
+                  <td>${renderSparkline(v)}</td>
+                  <td style="color: var(--text-sub);">${(v.channelAverageViews || 0).toLocaleString('ru-RU')}</td>
+                  <td><a href="${v.url}" target="_blank" style="color: #fff; font-weight: 600;">Открыть ↗</a></td>
+                </tr>
+              `}).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    }
+
+    // ─── Компактный список результатов в карточке (топ-10) ───
+
+    async function scanCollection(encodedId) {
+      const id = decodeURIComponent(encodedId);
+      setCollectionsStatus(`⏳ Сканируем подборку...`);
+      await runRssScan(null, null, { collectionId: id, mode: 'fast' });
+    }
+
+    async function addNicheToCollection(encodedId) {
+      const id = decodeURIComponent(encodedId);
+      const coll = collectionsCache.find(c => c.id === id);
+      const name = prompt(`Ниша, каналы которой добавить в подборку ${coll ? `«${coll.name}»` : ''} (можно несколько через запятую):`);
+      if (!name) return;
+      const niches = name.split(',').map(s => s.trim()).filter(Boolean);
+      try {
+        let addedAll = 0, skippedAll = 0;
+        for (const nicheName of niches) {
+          const res = await fetch(`/api/collections/${encodeURIComponent(id)}/channels`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ niche: nicheName })
+          });
+          const data = await res.json();
+          if (!res.ok) { setCollectionsStatus('❌ ' + (data.error || 'Ошибка'), true); return; }
+          addedAll += data.added || 0;
+          skippedAll += data.skipped || 0;
+        }
+        setCollectionsStatus(`✅ Добавлено каналов: ${addedAll}${skippedAll ? ` (${skippedAll} уже в подборке)` : ''}`);
+        await loadCollections();
+      } catch (e) {
+        setCollectionsStatus('❌ ' + e.message, true);
+      }
+    }
+
+    async function exportCollection(encodedId) {
+      const id = decodeURIComponent(encodedId);
+      const coll = collectionsCache.find(c => c.id === id);
+      const name = coll?.name || 'collection_' + id;
+      try {
+        const res = await fetch(`/api/collections/${encodeURIComponent(id)}/export`);
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setCollectionsStatus('❌ ' + (data.error || 'Ошибка экспорта'), true);
+          return;
+        }
+        const data = await res.json();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${name}_${id}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        setCollectionsStatus('✅ Экспортировано: ' + a.download);
+      } catch (e) {
+        setCollectionsStatus('❌ ' + e.message, true);
+      }
+    }
+
+    // ─── Спарклайны / BOOM / escape ───
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[ch]));
+    }
+
+    function renderSparkline(v) {
+      const history = Array.isArray(v.metricsHistory) ? v.metricsHistory : [];
+      if (!history.length) return '<span class="sparkline-empty">— история недоступна —</span>';
+      const vals = history.filter(h => typeof h.views === 'number').map(h => h.views);
+      if (vals.length < 2) return '<span class="sparkline-empty">⚠ мало точек истории</span>';
+      const min = Math.min(...vals);
+      const max = Math.max(...vals);
+      const range = max - min || 1;
+      const w = 110, h = 34, pad = 2;
+      const stepX = (w - pad * 2) / (vals.length - 1);
+      const pts = vals.map((val, i) => {
+        const x = pad + i * stepX;
+        const y = h - pad - ((val - min) / range) * (h - pad * 2);
+        return [x, y];
+      });
+      const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+      const area = `${line} L${(w - pad).toFixed(1)},${h} L${pad},${h} Z`;
+      const color = Number(v.views24hGain) > 0 ? '#00ff88' : '#ffaa00';
+      return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+        <path d="${area}" fill="${color}" opacity="0.15"/>
+        <path d="${line}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>`;
+    }
+
+    function boomBadgeHtml(v) {
+      return (v.boom === true && !v.gain24hUnknown)
+        ? '<span class="boom-badge" title="Резкий рост за последние 24 часа">🔥 BOOM!</span>'
+        : '';
+    }
+
+    function gainCellHtml(v) {
+      const gain = v.views24hGain ?? v.viewsPerDay ?? 0;
+      if (v.gain24hUnknown && !gain) return '<span class="gain-unknown">н/д</span>';
+      if (gain > 0) return `<span class="gain-badge">+${Number(gain).toLocaleString('ru-RU')}</span>`;
+      return '<span style="color: var(--text-sub);">-</span>';
+    }
+
+    function renderVideos() {
+      const container = document.getElementById('videosContainer');
+      const viewType = document.getElementById('viewType').value;
+      const showThumbnails = document.getElementById('showThumbnailsToggle').checked;
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const selectedNiche = document.getElementById('nicheFilter').value;
+      const sort = document.getElementById('sortSelect').value;
+
+      let filtered = rawData.filter(v => {
+        const matchesSearch = (v.title || '').toLowerCase().includes(search) || (v.channelTitle || '').toLowerCase().includes(search);
+        const matchesNiche = selectedNiche === 'ALL' || v.niche === selectedNiche;
+        return matchesSearch && matchesNiche;
+      });
+
+      filtered.sort((a, b) => {
+        if (sort === 'newest') {
+          if (a.isNew !== b.isNew) return b.isNew ? 1 : -1;
+          return new Date(b.publishedAt || b.addedAt || 0) - new Date(a.publishedAt || a.addedAt || 0);
+        }
+        if (sort === 'pubDate') {
+          return new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0);
+        }
+        if (sort === 'ratio') return b.outlierRatio - a.outlierRatio;
+        if (sort === 'views') return b.views - a.views;
+      });
+
+      document.getElementById('count').innerText = filtered.length;
+      document.getElementById('videoCountTab').innerText = filtered.length;
+
+      if (viewType === 'grid') {
+        container.className = 'grid';
+        container.innerHTML = filtered.map(v => {
+          const gain = v.views24hGain ?? v.viewsPerDay ?? 0;
+          const thumbUrl = v.thumbnail || (v.id ? `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg` : '');
+          return `
+          <div class="card">
+            ${showThumbnails ? `
+              <div class="thumbnail-box" data-vid="${v.id || ''}" data-thumb="${thumbUrl}">
+                <img src="${thumbUrl}" class="thumbnail-img" loading="lazy" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${v.id || ''}/hqdefault.jpg';">
+                ${v.id ? `<button class="play-overlay" title="▶ Смотреть здесь" onclick="playInline(this, '${v.id}')">▶</button>` : ''}
+              </div>
+            ` : ''}
+            <div class="card-content">
+              <div>
+                ${v.niche ? `<span class="niche-tag">🏷️ ${v.niche}</span>` : ''}
+                ${v.isNew ? `<span class="badge-new">NEW</span>` : ''}
+                ${boomBadgeHtml(v)}
+                <div class="title">${v.title}</div>
+                <div class="channel">📺 ${v.channelTitle} • <span style="font-size:0.8rem; color:var(--text-sub);">📅 ${formatDate(v.publishedAt)}</span></div>
+                <div style="margin-bottom: 10px;">${renderSparkline(v)}</div>
+              </div>
+              <div>
+                <div class="stats">
+                  <div>
+                    Просмотры: <strong>${(v.views || 0).toLocaleString('ru-RU')}</strong>
+                    ${gainCellHtml(v)}
+                  </div>
+                  <div>Ratio: <strong style="color:var(--accent);">${v.outlierRatio}x</strong></div>
+                </div>
+                <a href="${v.url}" target="_blank" class="btn-link">Смотреть ↗</a>
+              </div>
+            </div>
+          </div>
+        `}).join('');
+      } else {
+        container.className = 'table-container';
+        container.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                ${showThumbnails ? '<th>Превью</th>' : ''}
+                <th>Outlier Ratio</th>
+                <th>Название</th>
+                <th>Опубликовано</th>
+                <th>Ниша</th>
+                <th>Канал</th>
+                <th>Просмотры</th>
+                <th>Прирост 24ч</th>
+                <th>Тренд (24ч)</th>
+                <th>Ср. Канала</th>
+                <th>Ссылка</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map(v => {
+                const gain = v.views24hGain ?? v.viewsPerDay ?? 0;
+                return `
+                <tr>
+                  ${showThumbnails ? `
+                    <td><img src="${v.thumbnail || ''}" class="table-thumb" alt="thumb"></td>
+                  ` : ''}
+                  <td>
+                    <strong style="color: var(--accent); font-size: 1.1rem;">${v.outlierRatio}x</strong>
+                  </td>
+                  <td style="max-width: 300px; font-weight: 500;">
+                    <a href="${v.url}" target="_blank" rel="noopener" style="color: var(--text); text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${v.title}</a>
+                    ${v.isNew ? `<span class="badge-new">NEW</span>` : ''}
+                    ${boomBadgeHtml(v)}
+                  </td>
+                  <td class="date-cell">📅 ${formatDate(v.publishedAt)}</td>
+                  <td>${v.niche ? `<span class="niche-tag" style="margin: 0;">${v.niche}</span>` : '-'}</td>
+                  <td style="color: var(--text-sub);">${v.channelTitle} ${v.foundVia ? '(RSS)' : ''}</td>
+                  <td><strong>${(v.views || 0).toLocaleString('ru-RU')}</strong></td>
+                  <td>
+                    ${gainCellHtml(v)}
+                  </td>
+                  <td>${renderSparkline(v)}</td>
+                  <td style="color: var(--text-sub);">${(v.channelAverageViews || 0).toLocaleString('ru-RU')}</td>
+                  <td><a href="${v.url}" target="_blank" style="color: #fff; font-weight: 600;">Открыть ↗</a></td>
+                </tr>
+              `}).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    }
+
+    updateQuotaDisplay();
+    loadChannels();
+    loadData();
+  </script>
+
+  <!-- Модальное окно: добавление каналов в подборку -->
+  <div class="modal-overlay" id="addChannelModal" hidden>
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>➕ Добавить каналы в подборку <span id="modalCollectionName" style="color:var(--accent);"></span></h3>
+        <button class="modal-close" onclick="closeAddChannelModal()" title="Закрыть">✕</button>
+      </div>
+      <input type="text" id="modalChannelSearch" class="modal-search" placeholder="🔍 Поиск канала в базе по названию или нише..." oninput="modalSearchChannels(this.value)">
+      <div class="modal-results" id="modalChannelResults">
+        <div style="color:var(--text-sub);">Введите минимум 2 символа, чтобы найти канал в базе. Либо вставьте ID канала ниже.</div>
+      </div>
+      <div class="modal-manual">
+        <span>Если канала нет в базе:</span>
+        <input type="text" id="modalManualChannel" placeholder="Вставьте ID канала (UC...) или название">
+        <button class="btn btn-blue btn-sm" onclick="modalAddManual()">➕ Добавить</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-sm" onclick="closeAddChannelModal()">Отмена</button>
+        <button class="btn btn-green" onclick="modalCommit()">Готово</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно: добавление каналов в нишу -->
+  <div class="modal-overlay" id="nicheChannelModal" hidden>
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>➕ Добавить каналы в нишу <span id="nicheModalName" style="color:var(--accent);"></span></h3>
+        <button class="modal-close" onclick="closeNicheChannelModal()" title="Закрыть">✕</button>
+      </div>
+      <input type="text" id="nicheModalChannelSearch" class="modal-search" placeholder="🔍 Поиск канала в базе по названию или нише..." oninput="nicheModalSearchChannels(this.value)">
+      <div class="modal-results" id="nicheModalChannelResults">
+        <div style="color:var(--text-sub);">Введите минимум 2 символа, чтобы найти канал в базе. Либо вставьте ID канала ниже.</div>
+      </div>
+      <div class="modal-manual">
+        <span>Если канала нет в базе:</span>
+        <input type="text" id="nicheModalManualChannel" placeholder="Вставьте ID канала (UC...) или название">
+        <button class="btn btn-blue btn-sm" onclick="nicheModalAddManual()">➕ Добавить</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-sm" onclick="closeNicheChannelModal()">Отмена</button>
+        <button class="btn btn-green" onclick="nicheModalCommit()">Готово</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
