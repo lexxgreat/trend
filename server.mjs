@@ -5,7 +5,7 @@ import { spawn } from 'child_process';
 import { YOUTUBE_API_KEY } from './config.mjs';
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static('public'));
