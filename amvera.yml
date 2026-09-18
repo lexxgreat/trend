@@ -1,0 +1,16 @@
+# Конфигурация деплоя на Amvera Cloud (https://amvera.ru)
+# Документация: https://docs.amvera.ru
+
+meta:
+  environment: node
+  toolchain:
+    name: npm
+    version: '20'
+
+build:
+  commands:
+    - npm install
+
+run:
+  scriptName: server.mjs
+  containerPort: 3000
